@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+class Todo {
+  late String todo;
+  late bool done;
+
+  Todo({required String todo, required bool done}) {
+    this.todo = todo;
+    this.done = done;
+  }
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -47,16 +57,24 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         children: [
           EnterTodo(add: (value) {
             setState(() {
-              todos.add(value);
+              todos.add(Todo(todo: value, done: false));
             });
           }),
           Column(
             children: todos.map((todo) {
-              return TodoCard(todo, () {
-                setState(() {
-                  todos.remove(todo);
-                });
-              });
+              return TodoCard(
+                todo: todo,
+                delete: () {
+                  setState(() {
+                    todos.remove(todo);
+                  });
+                },
+                onCheckChanged: (value) {
+                  setState(() {
+                    todo.done = value;
+                  });
+                },
+              );
             }).toList(),
           ),
         ],
@@ -101,18 +119,20 @@ class _EnterTodoState extends State<EnterTodo> {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     throw UnimplementedError();
   }
 }
 
 class TodoCard extends StatelessWidget {
-  late String todo;
+  late Todo todo;
   late Function delete;
+  late Function onCheckChanged;
+  bool done = false;
 
-  TodoCard(String todo, Function delete) {
-    this.todo = todo;
-    this.delete = delete;
+  TodoCard({Todo? todo, Function? delete, Function? onCheckChanged}) {
+    this.todo = todo!;
+    this.delete = delete!;
+    this.onCheckChanged = onCheckChanged!;
   }
   @override
   Widget build(BuildContext context) {
@@ -125,7 +145,7 @@ class TodoCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: Text(todo)),
+            Expanded(child: Text(todo.todo + " " + todo.done.toString())),
             IconButton(
                 onPressed: () {
                   delete();
